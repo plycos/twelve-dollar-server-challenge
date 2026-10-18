@@ -32,7 +32,7 @@ class FeedController(
             "SELECT p.id, p.body, p.created_at, u.username, (SELECT COUNT(*) FROM likes l WHERE l.post_id = p.id) AS like_count FROM posts p JOIN users u ON u.id = p.user_id"
         const val SQL_FEED = "$SQL_POST_BASE ORDER BY p.created_at DESC, p.id DESC LIMIT 20"
         const val SQL_GET_POST = "$SQL_POST_BASE WHERE p.id = ?"
-        const val SQL_CREATE_POST = "INSERT INTO posts (user_id, body) VALUES (?, ?) RETURNING id, body, created_at"
+        const val SQL_CREATE_POST = "INSERT INTO posts (user_id, body) VALUES (?, ?) RETURNING id, created_at"
         const val SQL_LIKE_POST =
             "INSERT INTO likes (user_id, post_id) VALUES (?, ?) ON CONFLICT (user_id, post_id) DO NOTHING"
 
@@ -139,9 +139,9 @@ class FeedController(
                             PostDTO(
                                 Post(
                                     id = rs.getInt(1),
-                                    body = rs.getString(2),
+                                    body = trimmed,
                                     author = username,
-                                    createdAt = formatTimestamp(rs.getString(3)),
+                                    createdAt = formatTimestamp(rs.getString(2)),
                                     likeCount = 0
                                 )
                             )
