@@ -1,10 +1,22 @@
 quarkus:
+  log:
+    level: INFO
   http:
     host: ${HOST:localhost}
     port: ${PORT:8080}
+    auth:
+      proactive: false
   datasource:
-    db-kind: sqlite
+    db-kind: other
     jdbc:
+      driver: org.sqlite.JDBC
       url: jdbc:sqlite:${SQLITE_PATH:./feed.db}
+      max-size: 1
+      additional-jdbc-properties:
+        journal_mode: WAL
+        synchronous: NORMAL
+        busy_timeout: 5000
     devservices:
       enabled: false
+
+jwt-secret: ${JWT_SECRET:twelve-dollar-challenge}
