@@ -7,4 +7,4 @@ exec java \
   -XX:+TieredCompilation \
   -Djdk.virtualThreadScheduler.parallelism=4 \
   -Djdk.virtualThreadScheduler.maxPoolSize=8 \
-  -jar target/server-runner.jar
+  -jar /opt/server-runner.jar

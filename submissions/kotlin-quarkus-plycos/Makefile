@@ -1,0 +1,23 @@
+IMAGE_NAME=twelve-dollar-challenge:latest
+CONTAINER_NAME=twelve-dollar-server
+
+.PHONY: docker-build
+docker-build:
+	docker build -t $(IMAGE_NAME) .
+
+.PHONY: docker-run
+docker-run:
+	docker run --rm \
+		--name $(CONTAINER_NAME) \
+		--cpus="1.0" \
+		--memory="2g" \
+		--memory-swap="2g" \
+		-p 3000:80 \
+		$(IMAGE_NAME)
+
+.PHONY: docker-stop
+docker-stop:
+	docker stop $(CONTAINER_NAME) || true
+
+.PHONY: docker-start
+docker-start: docker-build docker-run
