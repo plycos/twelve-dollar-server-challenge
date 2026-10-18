@@ -19,8 +19,8 @@ quarkus:
     jdbc:
       driver: org.sqlite.JDBC
       url: jdbc:sqlite:${SQLITE_PATH:./feed.db}
-      min-size: 8
-      max-size: 8
+      min-size: 4
+      max-size: 4
       additional-jdbc-properties:
         journal_mode: WAL
         synchronous: NORMAL
@@ -28,5 +28,20 @@ quarkus:
         foreign_keys: on
         mmap_size: 268435456
         cache_size: -16000
+        query_only: true
     devservices:
       enabled: false
+    writer:
+      db-kind: other
+      jdbc:
+        driver: org.sqlite.JDBC
+        url: jdbc:sqlite:${SQLITE_PATH:./feed.db}
+        min-size: 1
+        max-size: 1
+        additional-jdbc-properties:
+          journal_mode: WAL
+          synchronous: NORMAL
+          busy_timeout: 5000
+          foreign_keys: on
+          mmap_size: 268435456
+          cache_size: -16000
