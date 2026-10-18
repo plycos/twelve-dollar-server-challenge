@@ -26,6 +26,11 @@ data class Post(
 )
 
 @Serializable
+data class PostDTO(
+    val post: Post
+)
+
+@Serializable
 data class ErrorDTO(
     val error: String
 )

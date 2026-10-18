@@ -1,7 +1,8 @@
 package com.lycosp.controllers.mappers
 
 import com.lycosp.ErrorDTO
-import com.lycosp.exceptions.TokenException
+import io.quarkus.security.AuthenticationCompletionException
+import io.quarkus.security.AuthenticationFailedException
 import io.quarkus.security.UnauthorizedException
 import jakarta.ws.rs.NotAllowedException
 import jakarta.ws.rs.NotFoundException
@@ -12,25 +13,36 @@ class ErrorMappers {
     private fun error(status: Int, message: String): Response =
         Response.status(status).entity(ErrorDTO(message)).build()
 
-    @ServerExceptionMapper
-    fun unauthorized(e: UnauthorizedException) = error(401, "missing bearer token")
-
-    @ServerExceptionMapper
-    fun authFailed(e: SecurityException): Response {
-        val tokenError = generateSequence<Throwable>(e) { it.cause }
-            .filterIsInstance<TokenException>()
-            .firstOrNull()?.error
-        return error(401, tokenError ?: "invalid or expired token")
+    private fun extractAuthMessage(e: Throwable, default: String = "invalid or expired token"): String {
+        val knownErrors = setOf("missing bearer token", "invalid or expired token", "invalid token payload")
+        return generateSequence(e) { it.cause }
+            .mapNotNull { it.message }
+            .firstOrNull { it in knownErrors }
+            ?: (e.message?.takeIf { it in knownErrors } ?: default)
     }
 
     @ServerExceptionMapper
-    fun notFound(e: NotFoundException) = error(404, "not found")
+    fun unauthorized(e: UnauthorizedException): Response =
+        error(401, "missing bearer token")
 
     @ServerExceptionMapper
-    fun notAllowed(e: NotAllowedException) = error(404, "not found")
+    fun authFailed(e: AuthenticationFailedException): Response =
+        error(401, extractAuthMessage(e, "invalid or expired token"))
 
     @ServerExceptionMapper
-    fun other(e: Throwable): Response {
-        return error(500, "internal server error")
-    }
+    fun authCompletion(e: AuthenticationCompletionException): Response =
+        error(401, extractAuthMessage(e, "invalid or expired token"))
+
+    @ServerExceptionMapper
+    fun securityException(e: SecurityException): Response =
+        error(401, extractAuthMessage(e, "invalid or expired token"))
+
+    @ServerExceptionMapper
+    fun notFound(e: NotFoundException): Response = error(404, "not found")
+
+    @ServerExceptionMapper
+    fun notAllowed(e: NotAllowedException): Response = error(404, "not found")
+
+    @ServerExceptionMapper
+    fun other(e: Throwable): Response = error(500, "internal server error")
 }

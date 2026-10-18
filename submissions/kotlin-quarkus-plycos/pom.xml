@@ -21,7 +21,6 @@
         <surefire-plugin.version>3.5.6</surefire-plugin.version>
 
         <sqlite.version>3.53.4.0</sqlite.version>
-        <jose4j.version>0.9.7</jose4j.version>
     </properties>
 
     <dependencyManagement>
@@ -65,12 +64,6 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-kotlin-serialization</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.bitbucket.b_c</groupId>
-            <artifactId>jose4j</artifactId>
-            <version>${jose4j.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>

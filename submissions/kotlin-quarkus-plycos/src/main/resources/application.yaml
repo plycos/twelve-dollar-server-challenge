@@ -1,4 +1,7 @@
 quarkus:
+  package:
+    jar:
+      type: uber-jar
   log:
     level: INFO
   http:
@@ -16,7 +19,6 @@ quarkus:
         journal_mode: WAL
         synchronous: NORMAL
         busy_timeout: 5000
+        foreign_keys: on
     devservices:
       enabled: false
-
-jwt-secret: ${JWT_SECRET:twelve-dollar-challenge}

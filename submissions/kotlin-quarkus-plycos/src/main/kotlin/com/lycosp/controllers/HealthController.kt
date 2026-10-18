@@ -2,6 +2,7 @@ package com.lycosp.controllers
 
 import com.lycosp.HealthCheck
 import com.lycosp.controllers.utils.ResponseFactory
+import io.smallrye.common.annotation.RunOnVirtualThread
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.GET
 import jakarta.ws.rs.Path
@@ -15,6 +16,7 @@ import javax.sql.DataSource
 @ApplicationScoped
 @Path("/health")
 @Produces(MediaType.APPLICATION_JSON)
+@RunOnVirtualThread
 class HealthController(
     private val dataSource: DataSource
 ) {
@@ -36,13 +38,15 @@ class HealthController(
                 )
             )
         } catch (_: Exception) {
-            ResponseFactory.internalServerError(
-                HealthCheck(
-                    status = "degraded",
-                    db = "unreachable",
-                    error = "internal server error"
+            Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                .entity(
+                    HealthCheck(
+                        status = "degraded",
+                        db = "unreachable",
+                        error = "internal server error"
+                    )
                 )
-            )
+                .build()
         }
     }
 }

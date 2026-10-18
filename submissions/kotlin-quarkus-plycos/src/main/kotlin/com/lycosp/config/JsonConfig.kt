@@ -12,5 +12,6 @@ class JsonConfig {
     @Produces
     fun json(): Json = Json {
         ignoreUnknownKeys = true
+        explicitNulls = false
     }
 }

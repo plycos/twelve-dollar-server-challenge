@@ -3,21 +3,18 @@ package com.lycosp.controllers
 import com.lycosp.Feed
 import com.lycosp.LikeDTO
 import com.lycosp.Post
-import com.lycosp.PostBody
+import com.lycosp.PostDTO
 import com.lycosp.controllers.utils.ResponseFactory
 import io.quarkus.security.Authenticated
 import io.quarkus.security.identity.SecurityIdentity
+import io.smallrye.common.annotation.RunOnVirtualThread
 import jakarta.enterprise.context.ApplicationScoped
-import jakarta.ws.rs.Consumes
-import jakarta.ws.rs.GET
-import jakarta.ws.rs.POST
-import jakarta.ws.rs.Path
-import jakarta.ws.rs.PathParam
-import jakarta.ws.rs.Produces
+import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import java.sql.ResultSet
 import java.sql.SQLException
 import javax.sql.DataSource
@@ -25,6 +22,7 @@ import javax.sql.DataSource
 @ApplicationScoped
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
+@RunOnVirtualThread
 class FeedController(
     private val dataSource: DataSource,
     private val identity: SecurityIdentity
@@ -39,11 +37,24 @@ class FeedController(
             "INSERT INTO likes (user_id, post_id) VALUES (?, ?) ON CONFLICT (user_id, post_id) DO NOTHING"
 
         @JvmStatic
+        private fun formatTimestamp(ts: String): String {
+            val dotIndex = ts.indexOf('.')
+            val zIndex = ts.lastIndexOf('Z')
+            if (dotIndex in 1..<zIndex) {
+                val decimalPart = ts.substring(dotIndex + 1, zIndex)
+                if (decimalPart.length > 3) {
+                    return ts.substring(0, dotIndex + 1) + decimalPart.substring(0, 3) + "Z"
+                }
+            }
+            return ts
+        }
+
+        @JvmStatic
         private fun postFromResultSet(rs: ResultSet): Post {
             return Post(
                 id = rs.getInt(1),
                 body = rs.getString(2),
-                createdAt = rs.getString(3),
+                createdAt = formatTimestamp(rs.getString(3)),
                 author = rs.getString(4),
                 likeCount = rs.getInt(5)
             )
@@ -79,7 +90,7 @@ class FeedController(
             conn.prepareStatement(SQL_GET_POST).use { stmt ->
                 stmt.setInt(1, id)
                 stmt.executeQuery().use { rs ->
-                    return if (rs.next()) ResponseFactory.ok(postFromResultSet(rs))
+                    return if (rs.next()) ResponseFactory.ok(PostDTO(postFromResultSet(rs)))
                     else ResponseFactory.notFound("post not found")
                 }
             }
@@ -93,32 +104,46 @@ class FeedController(
     fun createPost(
         raw: String
     ): Response {
-        if (raw.isBlank()) return ResponseFactory.badRequest("body is required")
-        val decoded: PostBody = try {
-            Json.decodeFromString<PostBody>(raw)
-        } catch (_: SerializationException) {
-            return ResponseFactory.internalServerError()
-        } catch (_: IllegalArgumentException) {
+        val jsonElement = try {
+            Json.parseToJsonElement(raw)
+        } catch (_: Exception) {
             return ResponseFactory.badRequest("malformed JSON body")
         }
-        if (decoded.body.isBlank()) return ResponseFactory.badRequest("body is required")
-        if (decoded.body.trim().length > 500) return ResponseFactory.badRequest("body must be at most 500 characters")
+        val jsonObject = jsonElement as? JsonObject
+            ?: return ResponseFactory.badRequest("body is required")
+        val bodyElement = jsonObject["body"]
+            ?: return ResponseFactory.badRequest("body is required")
+        val bodyPrimitive = bodyElement as? JsonPrimitive
+            ?: return ResponseFactory.badRequest("body is required")
+        if (!bodyPrimitive.isString) {
+            return ResponseFactory.badRequest("body is required")
+        }
+        val bodyText = bodyPrimitive.content
+        val trimmed = bodyText.trim()
+        if (trimmed.isEmpty()) {
+            return ResponseFactory.badRequest("body is required")
+        }
+        if (trimmed.length > 500) {
+            return ResponseFactory.badRequest("body must be at most 500 characters")
+        }
         val userId = identity.getAttribute<Int>("userId")
         val username = identity.principal.name
         try {
             dataSource.connection.use { conn ->
                 conn.prepareStatement(SQL_CREATE_POST).use { stmt ->
                     stmt.setInt(1, userId)
-                    stmt.setString(2, decoded.body.trim())
+                    stmt.setString(2, trimmed)
                     stmt.executeQuery().use { rs ->
                         rs.next()
                         return ResponseFactory.created(
-                            Post(
-                                id = rs.getInt(1),
-                                body = rs.getString(2),
-                                author = username,
-                                createdAt = rs.getString(3),
-                                likeCount = 0
+                            PostDTO(
+                                Post(
+                                    id = rs.getInt(1),
+                                    body = rs.getString(2),
+                                    author = username,
+                                    createdAt = formatTimestamp(rs.getString(3)),
+                                    likeCount = 0
+                                )
                             )
                         )
                     }
