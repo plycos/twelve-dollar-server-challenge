@@ -1,0 +1,10 @@
+quarkus:
+  http:
+    host: ${HOST:localhost}
+    port: ${PORT:8080}
+  datasource:
+    db-kind: sqlite
+    jdbc:
+      url: jdbc:sqlite:${SQLITE_PATH:./feed.db}
+    devservices:
+      enabled: false
