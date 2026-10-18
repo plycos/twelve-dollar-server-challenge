@@ -7,6 +7,7 @@ exec java \
   -Xmn600m \
   -XX:+UseParallelGC \
   -XX:+TieredCompilation \
+  -XX:+UseCompactObjectHeaders \
   -Djdk.virtualThreadScheduler.parallelism=4 \
   -Djdk.virtualThreadScheduler.maxPoolSize=8 \
   -jar /opt/server-runner.jar
