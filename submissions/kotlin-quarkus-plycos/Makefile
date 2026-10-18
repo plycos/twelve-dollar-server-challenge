@@ -12,6 +12,7 @@ docker-run:
 		--cpus="1.0" \
 		--memory="2g" \
 		--memory-swap="2g" \
+		--ulimit nofile=65535:65535 \
 		-p 3000:80 \
 		$(IMAGE_NAME)
 

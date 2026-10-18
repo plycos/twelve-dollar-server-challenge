@@ -9,6 +9,11 @@ quarkus:
     port: ${PORT:80}
     auth:
       proactive: false
+    accept-backlog: 8192
+    limits:
+      max-header-size: 8K
+    so-reuse-port: true
+    idle-timeout: 30s
   datasource:
     db-kind: other
     jdbc:
