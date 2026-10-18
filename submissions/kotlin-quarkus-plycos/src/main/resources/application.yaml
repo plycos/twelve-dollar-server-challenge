@@ -13,7 +13,7 @@ quarkus:
     limits:
       max-header-size: 8K
     so-reuse-port: true
-    idle-timeout: 30s
+    idle-timeout: 120s
   datasource:
     db-kind: other
     jdbc:

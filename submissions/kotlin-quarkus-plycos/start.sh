@@ -2,9 +2,9 @@
 cd "$(dirname "$0")"
 ulimit -n 65535 2>/dev/null || true
 exec java \
-  -Xms800m \
-  -Xmx800m \
-  -Xmn600m \
+  -Xms650m \
+  -Xmx650m \
+  -Xmn480m \
   -XX:+UseParallelGC \
   -XX:+TieredCompilation \
   -XX:+UseCompactObjectHeaders \
