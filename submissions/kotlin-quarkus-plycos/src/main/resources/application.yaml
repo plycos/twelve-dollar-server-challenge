@@ -9,7 +9,7 @@ quarkus:
     port: ${PORT:80}
     auth:
       proactive: false
-    accept-backlog: 8192
+    accept-backlog: 16384
     limits:
       max-header-size: 8K
     so-reuse-port: true
