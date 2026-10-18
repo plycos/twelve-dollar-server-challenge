@@ -14,11 +14,14 @@ quarkus:
     jdbc:
       driver: org.sqlite.JDBC
       url: jdbc:sqlite:${SQLITE_PATH:./feed.db}
-      max-size: 1
+      min-size: 8
+      max-size: 8
       additional-jdbc-properties:
         journal_mode: WAL
         synchronous: NORMAL
         busy_timeout: 5000
         foreign_keys: on
+        mmap_size: 268435456
+        cache_size: -16000
     devservices:
       enabled: false

@@ -22,7 +22,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.time.Instant
-import java.util.Base64
+import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
@@ -33,17 +33,20 @@ private val POSITIVE_INT = Regex("^[1-9][0-9]*$")
 @ApplicationScoped
 class CustomAuthMechanism(
     @ConfigProperty(name = "JWT_SECRET", defaultValue = "twelve-dollar-challenge")
-    private val jwtSecret: String
+    jwtSecret: String
 ) : HttpAuthenticationMechanism {
+
+    private val secretKeySpec =
+        SecretKeySpec(
+            jwtSecret.toByteArray(StandardCharsets.UTF_8),
+            "HmacSHA256"
+        )
 
     override fun authenticate(
         context: RoutingContext,
         identityProviderManager: IdentityProviderManager
     ): Uni<SecurityIdentity> {
-        val authHeader = context.request().getHeader("Authorization")
-        if (authHeader == null) {
-            return Uni.createFrom().nullItem()
-        }
+        val authHeader = context.request().getHeader("Authorization") ?: return Uni.createFrom().nullItem()
 
         if (!authHeader.startsWith("Bearer ")) {
             context.put("auth_error", "missing bearer token")
@@ -94,7 +97,7 @@ class CustomAuthMechanism(
         val dataToSign = (parts[0] + "." + parts[1]).toByteArray(StandardCharsets.US_ASCII)
         val expectedSignature = try {
             val mac = Mac.getInstance("HmacSHA256")
-            mac.init(SecretKeySpec(jwtSecret.toByteArray(StandardCharsets.UTF_8), "HmacSHA256"))
+            mac.init(secretKeySpec)
             mac.doFinal(dataToSign)
         } catch (_: Exception) {
             context.put("auth_error", "invalid or expired token")
@@ -130,7 +133,8 @@ class CustomAuthMechanism(
         val usernamePrimitive = payloadJson["username"] as? JsonPrimitive
 
         val subStr = if (subPrimitive != null && subPrimitive.isString) subPrimitive.content else null
-        val usernameStr = if (usernamePrimitive != null && usernamePrimitive.isString) usernamePrimitive.content else null
+        val usernameStr =
+            if (usernamePrimitive != null && usernamePrimitive.isString) usernamePrimitive.content else null
 
         val userId = if (subStr != null && POSITIVE_INT.matches(subStr)) subStr.toIntOrNull() else null
 
