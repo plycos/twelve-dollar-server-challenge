@@ -2,6 +2,7 @@
 cd "$(dirname "$0")"
 ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 exec java \
+  -XX:ActiveProcessorCount=1 \
   -Xms650m \
   -Xmx650m \
   -XX:+UseParallelGC \
@@ -11,6 +12,6 @@ exec java \
   -XX:MaxDirectMemorySize=64m \
   -Xss512k \
   -XX:+UseCompactObjectHeaders \
-  -Djdk.virtualThreadScheduler.parallelism=8 \
+  -Djdk.virtualThreadScheduler.parallelism=1 \
   -Djdk.virtualThreadScheduler.maxPoolSize=32 \
   -jar /opt/server-runner.jar
