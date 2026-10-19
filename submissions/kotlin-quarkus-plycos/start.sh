@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 cd "$(dirname "$0")"
-ulimit -n 65535 2>/dev/null || true
+ulimit -n "$(ulimit -Hn)" 2>/dev/null || true
 exec java \
   -Xms650m \
   -Xmx650m \
-  -Xmn480m \
   -XX:+UseParallelGC \
-  -XX:+TieredCompilation \
+  -XX:+AlwaysPreTouch \
+  -XX:MaxMetaspaceSize=128m \
+  -XX:ReservedCodeCacheSize=64m \
+  -XX:MaxDirectMemorySize=64m \
+  -Xss512k \
   -XX:+UseCompactObjectHeaders \
-  -Djdk.virtualThreadScheduler.parallelism=4 \
-  -Djdk.virtualThreadScheduler.maxPoolSize=8 \
+  -Djdk.virtualThreadScheduler.parallelism=1 \
+  -Djdk.virtualThreadScheduler.maxPoolSize=32 \
   -jar /opt/server-runner.jar
