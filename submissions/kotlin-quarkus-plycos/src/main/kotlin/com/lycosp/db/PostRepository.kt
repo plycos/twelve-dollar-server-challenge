@@ -26,24 +26,12 @@ class PostRepository(
         const val SQL_LIKE_POST =
             "INSERT INTO likes (user_id, post_id) VALUES (?, ?) ON CONFLICT (user_id, post_id) DO NOTHING"
 
-        @JvmStatic
-        private fun formatTimestamp(ts: String): String {
-            val dotIndex = ts.indexOf('.')
-            val zIndex = ts.lastIndexOf('Z')
-            if (dotIndex in 1..<zIndex) {
-                val decimalPart = ts.substring(dotIndex + 1, zIndex)
-                if (decimalPart.length > 3) {
-                    return ts.substring(0, dotIndex + 1) + decimalPart.substring(0, 3) + "Z"
-                }
-            }
-            return ts
-        }
 
         @JvmStatic
         private fun postFromResultSet(rs: ResultSet): Post = Post(
             id = rs.getInt(1),
             body = rs.getString(2),
-            createdAt = formatTimestamp(rs.getString(3)),
+            createdAt = rs.getString(3),
             author = rs.getString(4),
             likeCount = rs.getInt(5)
         )
@@ -79,7 +67,7 @@ class PostRepository(
         stmt.setString(2, body)
         stmt.executeQuery().use { rs ->
             if (!rs.next()) throw SQLException("insert returned no row")
-            CreatedPost(rs.getInt(1), formatTimestamp(rs.getString(2)))
+            CreatedPost(rs.getInt(1), rs.getString(2))
         }
     }
 
