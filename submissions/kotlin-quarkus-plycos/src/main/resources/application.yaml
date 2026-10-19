@@ -7,6 +7,7 @@ quarkus:
   http:
     host: ${HOST:0.0.0.0}
     port: ${PORT:80}
+    so-reuse-port: true
     auth:
       proactive: false
   datasource:

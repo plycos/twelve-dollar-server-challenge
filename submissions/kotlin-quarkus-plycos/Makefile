@@ -9,9 +9,10 @@ docker-build:
 docker-run:
 	docker run --rm \
 		--name $(CONTAINER_NAME) \
-		--cpus="1.0" \
-		--memory="2g" \
-		--memory-swap="2g" \
+		--cpus="0.5" \
+		--cpuset-cpus="0" \
+		--memory="1800m" \
+		--memory-swap="1800m" \
 		--ulimit nofile=65535:65535 \
 		-p 3000:80 \
 		$(IMAGE_NAME)
