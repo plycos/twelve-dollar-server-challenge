@@ -11,6 +11,6 @@ exec java \
   -XX:MaxDirectMemorySize=64m \
   -Xss512k \
   -XX:+UseCompactObjectHeaders \
-  -Djdk.virtualThreadScheduler.parallelism=1 \
+  -Djdk.virtualThreadScheduler.parallelism=8 \
   -Djdk.virtualThreadScheduler.maxPoolSize=32 \
   -jar /opt/server-runner.jar
