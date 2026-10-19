@@ -1,7 +1,7 @@
 package com.lycosp.post.dto
 
-import kotlinx.serialization.Serializable
 import com.lycosp.post.dao.PostDAO
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class FeedDTO(

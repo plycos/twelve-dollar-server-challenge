@@ -6,10 +6,7 @@ import jakarta.ws.rs.NotAuthorizedException
 import jakarta.ws.rs.NotFoundException
 import kotlinx.serialization.Serializable
 import org.jboss.resteasy.reactive.RestResponse
-import org.jboss.resteasy.reactive.RestResponse.Status.BAD_REQUEST
-import org.jboss.resteasy.reactive.RestResponse.Status.UNAUTHORIZED
-import org.jboss.resteasy.reactive.RestResponse.Status.NOT_FOUND
-import org.jboss.resteasy.reactive.RestResponse.Status.INTERNAL_SERVER_ERROR
+import org.jboss.resteasy.reactive.RestResponse.Status.*
 import org.jboss.resteasy.reactive.server.ServerExceptionMapper
 
 @Serializable

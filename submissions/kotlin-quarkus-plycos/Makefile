@@ -9,7 +9,7 @@ docker-build:
 docker-run:
 	docker run --rm \
 		--name $(CONTAINER_NAME) \
-		--cpus="0.5" \
+		--cpus="0.33" \
 		--cpuset-cpus="0" \
 		--memory="1800m" \
 		--memory-swap="1800m" \

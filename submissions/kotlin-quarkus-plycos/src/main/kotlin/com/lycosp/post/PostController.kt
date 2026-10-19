@@ -1,6 +1,11 @@
 package com.lycosp.post
 
+import com.lycosp.post.dto.FeedDTO
+import com.lycosp.post.dto.LikeDTO
+import com.lycosp.post.dto.PostDTO
+import com.lycosp.utils.toPositiveIntOrNull
 import io.quarkus.security.Authenticated
+import io.smallrye.common.annotation.RunOnVirtualThread
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.*
 import jakarta.ws.rs.core.MediaType
@@ -11,15 +16,12 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import org.jboss.resteasy.reactive.RestResponse
 import org.jboss.resteasy.reactive.RestResponse.Status.CREATED
 import org.jboss.resteasy.reactive.RestResponse.Status.OK
-import com.lycosp.post.dto.FeedDTO
-import com.lycosp.post.dto.LikeDTO
-import com.lycosp.post.dto.PostDTO
-import com.lycosp.utils.toPositiveIntOrNull
 
 @ApplicationScoped
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RunOnVirtualThread
 class PostController(
     private val service: PostService
 ) {
