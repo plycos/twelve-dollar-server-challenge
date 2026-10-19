@@ -40,7 +40,7 @@ class PostController(
     @POST
     @Path("/posts")
     @Authenticated
-    fun create(rawBody: String): PostDTO {
+    fun create(rawBody: String): RestResponse<PostDTO> {
         val element = try {
             Json.parseToJsonElement(rawBody)
         } catch (e: SerializationException) {
@@ -53,7 +53,7 @@ class PostController(
             throw BadRequestException("body is required", e)
         }
 
-        return service.create(parsed.body)
+        return RestResponse.status(CREATED, service.create(parsed.body))
     }
 
     @POST
