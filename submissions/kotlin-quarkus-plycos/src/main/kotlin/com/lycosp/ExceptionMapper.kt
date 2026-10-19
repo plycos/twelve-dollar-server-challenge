@@ -31,7 +31,11 @@ class ExceptionMapper {
 
     @ServerExceptionMapper
     fun notFound(e: NotFoundException): ErrorResponse =
-        RestResponse.status(NOT_FOUND, ErrorDTO(e.message ?: "not found"))
+        RestResponse.status(NOT_FOUND, ErrorDTO("not found"))
+
+    @ServerExceptionMapper
+    fun postNotFound(e: PostNotFound): ErrorResponse =
+        RestResponse.status(NOT_FOUND, ErrorDTO(e.message))
 
     @ServerExceptionMapper
     fun internalServerError(e: InternalServerErrorException): ErrorResponse =

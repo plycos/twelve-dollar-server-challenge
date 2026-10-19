@@ -3,6 +3,7 @@ package com.lycosp.security
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.MissingClaimException
+import com.lycosp.utils.toPositiveIntOrNull
 import io.quarkus.security.identity.IdentityProviderManager
 import io.quarkus.security.identity.SecurityIdentity
 import io.quarkus.security.runtime.QuarkusPrincipal
@@ -17,7 +18,6 @@ import jakarta.enterprise.inject.Alternative
 import jakarta.ws.rs.NotAuthorizedException
 import org.eclipse.microprofile.config.inject.ConfigProperty
 import org.jboss.resteasy.reactive.RestResponse.StatusCode.UNAUTHORIZED
-import com.lycosp.utils.toPositiveIntOrNull
 
 @Alternative
 @Priority(1)
@@ -32,9 +32,9 @@ class JwtAuthMechanism(
             .withClaimPresence("username")
             .build()
 
-    private fun missingToken(e: Exception? = null) = NotAuthorizedException("missing bearer token", e)
-    private fun badToken(e: Exception? = null) = NotAuthorizedException("invalid or expired token", e)
-    private fun invalidToken(e: Exception? = null) = NotAuthorizedException("invalid token payload", e)
+    private fun missingToken(e: Exception? = null) = NotAuthorizedException("missing bearer token", e, "Bearer")
+    private fun badToken(e: Exception? = null) = NotAuthorizedException("invalid or expired token", e, "Bearer")
+    private fun invalidToken(e: Exception? = null) = NotAuthorizedException("invalid token payload", e, "Bearer")
 
     override fun authenticate(
         context: RoutingContext,
@@ -42,19 +42,19 @@ class JwtAuthMechanism(
     ): Uni<SecurityIdentity> {
         val authorization = context.request().getHeader("Authorization")
         if (authorization == null || !authorization.startsWith("Bearer "))
-            return Uni.createFrom().failure(missingToken())
+            throw missingToken()
 
         val token = authorization.substring(7)
         val decodedJwt = try {
             verifier.verify(token)
         } catch (e: MissingClaimException) {
-            return Uni.createFrom().failure(invalidToken(e))
+            throw invalidToken(e)
         } catch (e: Exception) {
-            return Uni.createFrom().failure(badToken(e))
+            throw badToken(e)
         }
 
-        val userId = decodedJwt.subject.toPositiveIntOrNull() ?: return Uni.createFrom().failure(invalidToken())
-        val username = decodedJwt.getClaim("username").asString() ?: return Uni.createFrom().failure(invalidToken())
+        val userId = decodedJwt.subject.toPositiveIntOrNull() ?: throw invalidToken()
+        val username = decodedJwt.getClaim("username").asString() ?: throw invalidToken()
 
         val identity = QuarkusSecurityIdentity.builder()
             .setPrincipal(QuarkusPrincipal(username))
@@ -65,5 +65,5 @@ class JwtAuthMechanism(
     }
 
     override fun getChallenge(context: RoutingContext): Uni<ChallengeData> =
-        Uni.createFrom().item(ChallengeData(UNAUTHORIZED))
+        Uni.createFrom().item(ChallengeData(UNAUTHORIZED, "WWW-Authenticate", "Bearer"))
 }

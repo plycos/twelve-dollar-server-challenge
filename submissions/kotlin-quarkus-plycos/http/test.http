@@ -1,0 +1,7 @@
+GET localhost:80/posts/500001
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidXNlcm5hbWUiOiJnb2xkZW5fZW1iZXJfMSIsImlhdCI6MTc5MjM1MjU0OSwiZXhwIjoyMTA3NzEyNTQ5fQ.KYeibUb0b21Lz132fZfc82SeHnbWHaKAgesTcvdOeLU
+Content-Type: application/json
+
+//{
+//  "body": "  test: <b>&amp;</b> \"quoted\" / café ✓"
+//}

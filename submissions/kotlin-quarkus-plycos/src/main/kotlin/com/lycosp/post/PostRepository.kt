@@ -1,11 +1,11 @@
 package com.lycosp.post
 
+import com.lycosp.PostNotFound
+import com.lycosp.post.dao.PostDAO
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.ws.rs.InternalServerErrorException
-import jakarta.ws.rs.NotFoundException
 import org.sqlite.SQLiteErrorCode
 import org.sqlite.SQLiteException
-import com.lycosp.post.dao.PostDAO
 import java.sql.ResultSet
 import java.sql.SQLException
 import javax.sql.DataSource
@@ -138,7 +138,7 @@ class PostRepository(
                 }
             }
         } catch (e: SQLException) {
-            if (isForeignKeyViolation(e)) throw NotFoundException(e)
+            if (isForeignKeyViolation(e)) throw PostNotFound()
             throw InternalServerErrorException(e)
         }
     }

@@ -1,12 +1,12 @@
 package com.lycosp.post
 
-import io.quarkus.security.identity.SecurityIdentity
-import jakarta.enterprise.context.ApplicationScoped
-import jakarta.ws.rs.BadRequestException
-import jakarta.ws.rs.NotFoundException
+import com.lycosp.PostNotFound
 import com.lycosp.post.dto.FeedDTO
 import com.lycosp.post.dto.LikeDTO
 import com.lycosp.post.dto.PostDTO
+import io.quarkus.security.identity.SecurityIdentity
+import jakarta.enterprise.context.ApplicationScoped
+import jakarta.ws.rs.BadRequestException
 
 @ApplicationScoped
 class PostService(
@@ -17,7 +17,7 @@ class PostService(
     fun feed(): FeedDTO = FeedDTO(repository.feed())
 
     fun get(postId: Int): PostDTO =
-        PostDTO(repository.get(postId) ?: throw NotFoundException("post not found"))
+        PostDTO(repository.get(postId) ?: throw PostNotFound())
 
     fun create(body: String): PostDTO {
         val username = identity.principal.name
@@ -36,8 +36,9 @@ class PostService(
 
     fun like(postId: Int): LikeDTO {
         val userId = identity.getAttribute<Int>("userId")
-        val alreadyLiked = repository.like(userId, postId)
+        val alreadyLiked = !repository.like(userId, postId)
         return LikeDTO(
+            liked = true,
             alreadyLiked = alreadyLiked,
             postId = postId
         )

@@ -19,11 +19,11 @@ quarkus:
       additional-jdbc-properties:
         journal_mode: WAL
         busy_timeout: 5000
-        open_mode: 1
         mmap_size: 1073741824
         cache_size: -65536
         temp_store: MEMORY
         synchronous: NORMAL
+        foreign_keys: on
     devservices:
       enabled: false
 
