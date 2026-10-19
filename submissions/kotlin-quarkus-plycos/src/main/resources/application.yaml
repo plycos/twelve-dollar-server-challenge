@@ -9,39 +9,22 @@ quarkus:
     port: ${PORT:80}
     auth:
       proactive: false
-    accept-backlog: 16384
-    limits:
-      max-header-size: 8K
-    so-reuse-port: true
-    idle-timeout: 120s
   datasource:
     db-kind: other
     jdbc:
       driver: org.sqlite.JDBC
       url: jdbc:sqlite:${SQLITE_PATH:./feed.db}
-      min-size: 4
-      max-size: 4
+      min-size: 1
+      max-size: 1
       additional-jdbc-properties:
         journal_mode: WAL
-        synchronous: NORMAL
         busy_timeout: 5000
-        foreign_keys: on
-        mmap_size: 268435456
-        cache_size: -16000
-        query_only: true
+        open_mode: 1
+        mmap_size: 1073741824
+        cache_size: -65536
+        temp_store: MEMORY
+        synchronous: NORMAL
     devservices:
       enabled: false
-    writer:
-      db-kind: other
-      jdbc:
-        driver: org.sqlite.JDBC
-        url: jdbc:sqlite:${SQLITE_PATH:./feed.db}
-        min-size: 1
-        max-size: 1
-        additional-jdbc-properties:
-          journal_mode: WAL
-          synchronous: NORMAL
-          busy_timeout: 5000
-          foreign_keys: on
-          mmap_size: 268435456
-          cache_size: -16000
+
+jwt-secret: ${JWT_SECRET:twelve-dollar-challenge}
